@@ -1,5 +1,5 @@
 console.log("--------- ./sampleSrc/sample1.ts ----------");
-import {Hydrator, dehydrate, hydrate, Exclude} from '../src';
+import {Hydrator, dehydrate, hydrate} from '../src';
 
 class Human {
   pets:Pet[] = [];

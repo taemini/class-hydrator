@@ -1,4 +1,5 @@
 import {Hydrator} from '../index';
+import {OnHydrateMetadataKey} from '../decorators'
 
 export function hydrate(targetObj:any){
   let seenObj = [];
@@ -8,10 +9,6 @@ export function hydrate(targetObj:any){
     console.error('Hydrator:you can hydrate only a dehydrated object');
     return targetObj;
   }
-    //when targetObj == dehydratedObject
-  let newInst = new (Hydrator.getConstructor(targetObj._c_) as any)();
-  seenObj[targetObj._i_] = newInst;
-
 
   let hydrateProp = (targetProp:any) => {
     if(targetProp.constructor === String){
@@ -30,21 +27,30 @@ export function hydrate(targetObj:any){
     }else{
       //Array || Class || Object
       if(targetProp.constructor === Array){
-        //Array
+        //targetProp:Array
         let newArr = new Array();
         seenObj[targetProp.shift()] = newArr;
         for(let i in targetProp){
-          if(i==="_i_" || i==="_c_") continue;
           newArr[i] = hydrateProp(targetProp[i]);
         }
         return newArr;
       }else if(targetProp.constructor === Object && targetProp._c_){
-        //Class
-        let newInst = new (Hydrator.getConstructor(targetProp._c_) as any)();
+        //targetProp:Class
+        let classOfTarget = Hydrator.getConstructor(targetProp._c_) as any;
+        let newInst = new Object();
         seenObj[targetProp._i_] = newInst;
         for(let i in targetProp){
           if(i==="_i_" || i==="_c_") continue;
           newInst[i] = hydrateProp(targetProp[i]);
+        }
+        // let newInst = Object.create(classOfTarget.prototype, newObj as any);
+        (newInst as any).__proto__ = classOfTarget.prototype;
+        //apply @OnHydrate()
+        for(let i in targetProp){
+          let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,classOfTarget.prototype,i);
+          if(onHydrateMetadata){
+            newInst[i] = onHydrateMetadata.callback(targetProp);
+          }
         }
         return newInst;
       }else{
@@ -60,10 +66,5 @@ export function hydrate(targetObj:any){
     }
   };
 
-  for(let i in targetObj){
-    if(i==="_i_" || i==="_c_") continue;
-    newInst[i] = hydrateProp(targetObj[i]);
-  }
-
-  return newInst;
+  return hydrateProp(targetObj);
 }

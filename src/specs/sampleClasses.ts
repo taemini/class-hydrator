@@ -1,6 +1,13 @@
+import {OnHydrate} from '../index';
+
 export class Seed {
+  @OnHydrate((self)=>{
+    return 0;
+  })
   fruit:Fruit;
-  constructor(){ }
+  constructor(){
+    console.log('constructor executed');
+  }
   setFruit(fruit:Fruit){
     this.fruit = fruit;
   }

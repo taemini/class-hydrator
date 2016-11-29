@@ -9,8 +9,10 @@ describe("Hydrator", function(){
   it("should have been provided Object, Array as default", function(){
     expect(Hydrator.constructors).toEqual(jasmine.objectContaining({"Object":Object, "Array":Array}));
   });
-  it("should have constructors which have been provided by '.provideClasses([classes])'", function(){
-    expect(Hydrator.constructors).toEqual(jasmine.objectContaining({"Seed":Seed, "Mango":Mango, "Strawberry":Strawberry}));
+  it("should have constructors which have been provided by '.provideClasses()'", function(){
+    expect(Hydrator.constructors).toEqual(jasmine.objectContaining({
+      "Seed":Seed, "Mango":Mango, "Strawberry":Strawberry
+    }));
   });
   it("should be able to get constructor by '.getConstructor(className:string)'", function(){
     for(let i in this.classes){
@@ -43,4 +45,8 @@ describe("conservativeness of class type", function(){
     transformingMango = hydrate(transformingMango);
     expect(transformingMango).toEqual(jasmine.any(Mango));
   });
+});
+
+describe("@Exclude decorator", function(){
+
 });

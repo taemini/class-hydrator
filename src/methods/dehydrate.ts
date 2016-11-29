@@ -38,7 +38,6 @@ export function dehydrate(targetObj:any){
           }
           //_i_ of an Array is saved in [0] not ['_i_']
           newArr.unshift(seenObj.push(targetProp)-1);
-          console.log('newArr:',newArr);
           return newArr;
         }else{
           //Class type

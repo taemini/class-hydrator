@@ -3,7 +3,7 @@ import {dehydrate} from './methods/dehydrate';
 import {hydrate} from './methods/hydrate';
 export * from './methods/dehydrate';
 export * from './methods/hydrate';
-export * from './decorators/Exclude';
+export * from './decorators';
 
 export class Hydrator{
   static constructors = {
