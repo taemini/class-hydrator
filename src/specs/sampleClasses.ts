@@ -5,9 +5,7 @@ export class Seed {
     return 0;
   })
   fruit:Fruit;
-  constructor(){
-    console.log('constructor executed');
-  }
+  constructor(){ }
   setFruit(fruit:Fruit){
     this.fruit = fruit;
   }

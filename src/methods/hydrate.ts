@@ -1,8 +1,11 @@
 import {Hydrator} from '../index';
-import {OnHydrateMetadataKey} from '../decorators'
+import {OnHydrateMetadataKey, HydratableMetadataKey} from '../decorators'
 
-export function hydrate(targetObj:any){
+export function hydrate<T>(HydratableClass: {new(...args): T;}, targetObj:any):T{
+  console.log('HydrtableClass:',HydratableClass);
   let seenObj = [];
+  let providers = {};
+  providers[(HydratableClass as any).name] = HydratableClass;
 
   if(!targetObj._c_) {
     //when targetObj != dehydratedObject
@@ -35,17 +38,31 @@ export function hydrate(targetObj:any){
         }
         return newArr;
       }else if(targetProp.constructor === Object && targetProp._c_){
-        //targetProp:Class
-        let classOfTarget = Hydrator.getConstructor(targetProp._c_) as any;
+        //Class
+        let classOfTarget = providers[targetProp._c_];
+        if(!classOfTarget){
+          throw Error(`${targetProp._c_} was not provided to ${(HydratableClass as any).name}`)
+        }
         let newInst = new Object();
+
+        let hydratableMetadata = Reflect.getMetadata(HydratableMetadataKey,classOfTarget);
+        console.log(hydratableMetadata);
+        if(hydratableMetadata){
+          let targetProviders = hydratableMetadata.providers;
+          for(let i in targetProviders){
+            providers[i] = targetProviders[i];
+          }
+          console.log('providers:',providers);
+        }else{
+          throw Error(`${targetProp._c_} is not hydratable`)
+        }
         seenObj[targetProp._i_] = newInst;
         for(let i in targetProp){
           if(i==="_i_" || i==="_c_") continue;
           newInst[i] = hydrateProp(targetProp[i]);
         }
-        // let newInst = Object.create(classOfTarget.prototype, newObj as any);
         (newInst as any).__proto__ = classOfTarget.prototype;
-        //apply @OnHydrate()
+        // apply @OnHydrate()
         for(let i in targetProp){
           let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,classOfTarget.prototype,i);
           if(onHydrateMetadata){

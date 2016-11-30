@@ -37,8 +37,6 @@ class Cat implements Cat{
   }
 }
 
-Hydrator.provideClasses([Dog, Cat, Human]);
-
 let girl = new Human('Mary');
 let dog = new Dog('Toni', girl, {habitat:'outdoor', favorites:['chicken', 'santa', 'Mary']});
 let cat = new Cat('Charls', girl, {habitat:'indoor', favorites:['fish' ,'Toni']});
@@ -50,5 +48,5 @@ console.log('original girl:', girl);
 let dehydratedGirl = dehydrate(girl);
 console.log(JSON.stringify(dehydratedGirl));
 console.log('dehydrated girl:', dehydratedGirl);
-let hydratedGirl = hydrate(dehydratedGirl);
+let hydratedGirl = hydrate(Human,dehydratedGirl);
 console.log('hydrated girl:', hydratedGirl);
