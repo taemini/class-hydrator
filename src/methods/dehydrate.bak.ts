@@ -1,3 +1,4 @@
+import {OnDehydrateMetadataKey} from '../decorators';
 export function dehydrate(targetObj:any){
   let seenObj = [];
 
@@ -45,8 +46,13 @@ export function dehydrate(targetObj:any){
           newInst['_c_'] = targetProp.constructor.name;
           newInst['_i_'] = seenObj.push(targetProp)-1;
           for(let i in targetProp){
-            let newProp = dehydrateProp(targetProp[i]);
-            if(newProp) newInst[i] = newProp;
+            let onDehydrateMetadata = Reflect.getMetadata(OnDehydrateMetadataKey, targetProp.constructor.prototype, i);
+            if(onDehydrateMetadata){
+              newInst[i] = onDehydrateMetadata.callback(targetProp);
+            }else{
+              let newProp = dehydrateProp(targetProp[i]);
+              if(newProp) newInst[i] = newProp;
+            }
           }
           return newInst;
         }

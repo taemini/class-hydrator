@@ -1,4 +1,4 @@
-import {Hydrator, hydrate, dehydrate, Hydratable, OnHydrate} from '../index';
+import {Hydrator, hydrate, dehydrate, Hydratable, OnHydrate, OnDehydrate} from '../index';
 import {Seed, Mango, Strawberry} from './sampleClasses';
 
 describe("Hydratable", function(){
@@ -87,7 +87,7 @@ describe("OnHydrate", function(){
   }
   describe("with original instance", function(){
     let child = new Child('child', 12);
-    let hydratedChild = hydrate(child);
+    let hydratedChild = hydrate(child, Child);
     it("should work on own property", function(){
       expect(hydratedChild.age).toBe("Child.OnHydrate applied");
     });
@@ -103,6 +103,59 @@ describe("OnHydrate", function(){
       expect(hydratedChild.age).toBe("Child.OnHydrate applied");
     });
     it("should work on inherited property", function(){
+      expect(hydratedChild.name).toBe("Parent.OnHydrate applied");
+    });
+  });
+});
+describe("OnDehydrate", function(){
+  @Hydratable()
+  class Parent{
+    @OnDehydrate(()=>"Parent.OnDehydrate applied")
+    name:string;
+    constructor(name){ this.name = name }
+  }
+  @Hydratable()
+  class Child extends Parent{
+    @OnDehydrate(()=>"Child.OnDehydrate applied")
+    age:number;
+    constructor(name, age){ super(name); this.age = age;}
+  }
+  describe("with original instance", function(){
+    let child = new Child('child', 12);
+    let dehydratedChild = dehydrate(child);
+    it("should work on own property", function(){
+      expect(dehydratedChild.age).toBe("Child.OnDehydrate applied");
+    });
+    it("should work on inherited property", function(){
+      expect(dehydratedChild.name).toBe("Parent.OnDehydrate applied");
+    });
+  });
+});
+describe("both OnDehydrate and OnHydrate", function(){
+  @Hydratable()
+  class Parent{
+    @OnDehydrate(()=>"Parent.OnDehydrate applied")
+    @OnHydrate(()=>"Parent.OnHydrate applied")
+    name:string;
+    constructor(name){ this.name = name }
+  }
+  @Hydratable()
+  class Child extends Parent{
+    @OnDehydrate(()=>"Child.OnDehydrate applied")
+    @OnHydrate(()=>"Child.OnHydrate applied")
+    age:number;
+    constructor(name, age){ super(name); this.age = age;}
+  }
+  describe("with original instance", function(){
+    let child = new Child('child', 12);
+    let dehydratedChild = dehydrate(child);
+    let hydratedChild = hydrate(dehydratedChild, Child);
+    it("should work on own property", function(){
+      expect(dehydratedChild.age).toBe("Child.OnDehydrate applied");
+      expect(hydratedChild.age).toBe("Child.OnHydrate applied");
+    });
+    it("should work on inherited property", function(){
+      expect(dehydratedChild.name).toBe("Parent.OnDehydrate applied");
       expect(hydratedChild.name).toBe("Parent.OnHydrate applied");
     });
   });
