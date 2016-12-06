@@ -1,40 +1,25 @@
-import {HydratableMetadataKey, OnHydrateMetadataKey} from "../../decorators";
-import {resolveOnHydrate} from './resolveOnHydrate';
+import {OnHydrateMetadataKey} from "../../decorators";
 
-export function hydratePropWithoutInstantiating(targetProp){
-  // if(targetProp.constructor === Array || targetProp.constructor === Object){
-  //   if(targetProp.constructor === Array){
-  //     //Array
-  //     for(let i in targetProp){
-  //       resolveOnHydrate(targetProp[i]);
-  //     }
-  //   }else if(targetProp.constructor === Object){
-  //     //Object
-  //     for(let i in targetProp){
-  //       resolveOnHydrate(targetProp[i]);
-  //     }
-  //   }else{
-  //     //Class
-  //     let hydratableMetadata = Reflect.getMetadata(HydratableMetadataKey,classOfTarget);
-  //     console.log(hydratableMetadata);
-  //     if(hydratableMetadata){
-  //       let targetProviders = hydratableMetadata.providers;
-  //       for(let i in targetProviders){
-  //         providers[i] = targetProviders[i];
-  //       }
-  //       console.log('providers:',providers);
-  //     }else{
-  //       throw Error(`${targetProp._c_} is not hydratable`)
-  //     }
-  //     seenObj[targetProp._i_] = newInst;
-  //     for(let i in targetProp){
-  //       if(i==="_i_" || i==="_c_") continue;
-  //       newInst[i] = hydrateProp(targetProp[i], seenObj, providers, HydratableClass);
-  //     }
-  //     (newInst as any).__proto__ = classOfTarget.prototype;
-  //     // apply @OnHydrate()
-  //     resolveOnHydrate(newInst);
-  //     return newInst;
-  //   }
-  // }
+export function hydratePropWithoutInstantiating(targetProp, seenObj){
+  if(seenObj.indexOf(targetProp) !== -1){
+    //pass seenObj (prevent infinite recursive)
+  }else if(targetProp.constructor === String || targetProp.constructor === Number || targetProp.constructor === Boolean){
+    //do nothing
+  }else if(targetProp.constructor === Array || targetProp.constructor === Object){
+    //Array || Object
+    seenObj.push(targetProp);
+    for(let i in targetProp){
+      hydratePropWithoutInstantiating(targetProp[i], seenObj);
+    }
+  }else{
+    //class
+    seenObj.push(targetProp);
+    for(let i in targetProp){
+      let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey, targetProp.constructor.prototype, i);
+      if(onHydrateMetadata){
+        targetProp[i] = onHydrateMetadata.callback(targetProp);
+      }
+    }
+    hydratePropWithoutInstantiating(targetProp, seenObj);
+  }
 }

@@ -85,6 +85,16 @@ describe("OnHydrate", function(){
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  describe("with original instance", function(){
+    let child = new Child('child', 12);
+    let hydratedChild = hydrate(child);
+    it("should work on own property", function(){
+      expect(hydratedChild.age).toBe("Child.OnHydrate applied");
+    });
+    it("should work on inherited property", function(){
+      expect(hydratedChild.name).toBe("Parent.OnHydrate applied");
+    });
+  });
   describe("with dehydrated objects", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);

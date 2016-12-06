@@ -1,5 +1,4 @@
 import {HydratableMetadataKey, OnHydrateMetadataKey} from "../../decorators";
-import {resolveOnHydrate} from './resolveOnHydrate';
 
 export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
   if(targetProp.constructor === String){
@@ -39,7 +38,6 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
         for(let i in targetProviders){
           providers[i] = targetProviders[i];
         }
-        console.log('providers:',providers);
       }else{
         throw Error(`${targetProp._c_} is not hydratable`)
       }
@@ -52,7 +50,6 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
       // apply @OnHydrate()
       for(let i in newInst){
         let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,newInst.constructor.prototype,i);
-        console.log(i+' : ', onHydrateMetadata);
         if(onHydrateMetadata){
           newInst[i] = onHydrateMetadata.callback(newInst);
         }
