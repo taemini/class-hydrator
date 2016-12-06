@@ -48,5 +48,5 @@ console.log('original girl:', girl);
 let dehydratedGirl = dehydrate(girl);
 console.log(JSON.stringify(dehydratedGirl));
 console.log('dehydrated girl:', dehydratedGirl);
-let hydratedGirl = hydrate(Human,dehydratedGirl);
+let hydratedGirl = hydrate(dehydratedGirl, Human);
 console.log('hydrated girl:', hydratedGirl);

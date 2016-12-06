@@ -23,7 +23,7 @@ describe("Hydratable", function(){
     let redFruit = new Fruit(30, 30);
     let apple = new Apple(25, 28, 'red', redFruit);
     let dehydratedApple = dehydrate(apple);
-    let hydratedApple = hydrate(Apple, dehydratedApple);
+    let hydratedApple = hydrate(dehydratedApple, Apple);
     expect(hydratedApple).toEqual(jasmine.any(Apple));
     expect(hydratedApple.parent).toEqual(jasmine.any(Fruit));
   });
@@ -48,7 +48,7 @@ describe("hydrate exception handlers",function(){
     let redFruit = new Fruit(30, 30);
     let apple = new Apple(25, 28, 'red', redFruit);
     let dehydratedApple = dehydrate(apple);
-    expect(()=>{hydrate(Apple, dehydratedApple)}).toThrowError("Fruit is not hydratable")
+    expect(()=>{hydrate(dehydratedApple, Apple)}).toThrowError("Fruit is not hydratable")
   });
   it("should throw error when there was not provided class to hydrate", function(){
     class Plant{
@@ -69,23 +69,51 @@ describe("hydrate exception handlers",function(){
     let redFruit = new Fruit(30, 30);
     let apple = new Apple(25, 28, 'red', redFruit);
     let dehydratedApple = dehydrate(apple);
-    expect(()=>{hydrate(Apple, dehydratedApple)}).toThrowError("Fruit was not provided to Apple")
+    expect(()=>{hydrate(dehydratedApple, Apple)}).toThrowError("Fruit was not provided to Apple")
   })
 });
 describe("OnHydrate", function(){
-  it("should works on properties of parent Class", function(){
-    class Parent{
-      @OnHydrate(()=>"OnHydrate worked on Parent")
-      name:string;
-      constructor(name){ this.name = name }
-    }
-    class Child extends Parent{
-      @OnHydrate(()=>"OnHydrate worked on Child")
-      age:number;
-      constructor(name, age){ super(name); this.age = age;}
-    }
+  @Hydratable()
+  class Parent{
+    @OnHydrate(()=>"Parent.OnHydrate applied")
+    name:string;
+    constructor(name){ this.name = name }
+  }
+  @Hydratable()
+  class Child extends Parent{
+    @OnHydrate(()=>"Child.OnHydrate applied")
+    age:number;
+    constructor(name, age){ super(name); this.age = age;}
+  }
+  describe("with dehydrated objects", function(){
+    let child = new Child('child', 12);
+    let dehydratedChild = dehydrate(child);
+    let hydratedChild = hydrate(dehydratedChild, Child);
+    it("should work on own property", function(){
+      expect(hydratedChild.age).toBe("Child.OnHydrate applied");
+    });
+    it("should work on inherited property", function(){
+      expect(hydratedChild.name).toBe("Parent.OnHydrate applied");
+    });
   });
 });
+// describe("OnHydrate", function(){
+//   class Parent{
+//     @OnHydrate(()=>"OnHydrate worked on Parent")
+//     name:string;
+//     constructor(name){ this.name = name }
+//   }
+//   class Child extends Parent{
+//     @OnHydrate(()=>"OnHydrate worked on Child")
+//     age:number;
+//     constructor(name, age){ super(name); this.age = age;}
+//   }
+//   it("should works on properties of both parent and child class", function(){
+//     let child = new Child('child', 12);
+//     let hydratedChild = hydrate(child);
+//     expect(hydratedChild.name).toBe("OnHydrate worked on Parent");
+//   });
+// });
 // describe("Hydrator", function(){
 //   beforeAll(()=>{
 //     this.classes = [Seed, Mango, Strawberry];
