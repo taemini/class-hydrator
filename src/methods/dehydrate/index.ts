@@ -7,3 +7,7 @@ export function dehydrate(targetObj:any){
   newObj['_c_'] = targetObj.constructor.name;
   return dehydrateProp(targetObj, seenObj);
 }
+
+export function serialize(targetObj:any):string{
+  return JSON.stringify(dehydrate(targetObj));
+}

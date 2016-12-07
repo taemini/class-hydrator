@@ -1,7 +1,10 @@
 import {HydratableMetadataKey, OnHydrateMetadataKey} from "../../decorators";
 
 export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
-  if(targetProp.constructor === String){
+  if(targetProp === null || targetProp === undefined || targetProp.constructor === Number || targetProp.constructor === Boolean){
+    //primitive types
+    return targetProp;
+  }else if(targetProp.constructor === String){
     if(targetProp.indexOf('_i_') === 0){
       //TODO remove below line when clear about it.
       if(!seenObj[targetProp.slice(3)]) console.error("Hydrator:couldn't find seenObj");
@@ -11,9 +14,6 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
       //String
       return targetProp;
     }
-  }else if(targetProp.constructor === Number || targetProp.constructor === Boolean){
-    //primitive type
-    return targetProp;
   }else{
     //Array || Class || Object
     if(targetProp.constructor === Array){
@@ -48,8 +48,11 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
       }
       (newInst as any).__proto__ = classOfTarget.prototype;
       // apply @OnHydrate()
+      console.log('newInst:',newInst);
       for(let i in newInst){
-        let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,newInst.constructor.prototype,i);
+        console.log('i:'+i, newInst[i]);
+        let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,classOfTarget.prototype,i);
+        console.log('onHydrateMetadata:',onHydrateMetadata);
         if(onHydrateMetadata){
           newInst[i] = onHydrateMetadata.callback(newInst);
         }

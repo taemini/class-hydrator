@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import {dehydrate} from './methods/dehydrate';
-import {hydrate} from './methods/hydrate';
+import {dehydrate, serialize} from './methods/dehydrate';
+import {hydrate, deserialize} from './methods/hydrate';
 export * from './methods/dehydrate';
 export * from './methods/hydrate';
 export * from './decorators';
@@ -12,4 +12,6 @@ export class Hydrator{
   };
   static dehydrate = dehydrate;
   static hydrate = hydrate;
+  static serialize = serialize;
+  static deserialize = deserialize;
 }

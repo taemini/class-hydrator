@@ -21,3 +21,7 @@ export function hydrate<T>(targetObj:any, HydratableClass:{new(...args):T;}):T{
     return targetObj;
   }
 }
+
+export function deserialize<T>(targetObj:any, HydratableClass:{new(...args):T;}):T{
+  return hydrate(JSON.parse(targetObj), HydratableClass);
+}

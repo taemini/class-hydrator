@@ -1,4 +1,4 @@
-import {Hydrator, hydrate, dehydrate, Hydratable, OnHydrate, OnDehydrate} from '../index';
+import {Hydrator, hydrate, dehydrate, serialize, deserialize, Hydratable, OnHydrate, OnDehydrate, Exclude} from '../index';
 import {Seed, Mango, Strawberry} from './sampleClasses';
 
 describe("Hydratable", function(){
@@ -150,9 +150,12 @@ describe("both OnDehydrate and OnHydrate", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
     let hydratedChild = hydrate(dehydratedChild, Child);
+    let serializedChild = serialize(child);
+    let deserializedChild = deserialize(serializedChild, Child);
     it("should work on own property", function(){
       expect(dehydratedChild.age).toBe("Child.OnDehydrate applied");
       expect(hydratedChild.age).toBe("Child.OnHydrate applied");
+      expect(deserializedChild.age).toBe("Child.OnHydrate applied");
     });
     it("should work on inherited property", function(){
       expect(dehydratedChild.name).toBe("Parent.OnDehydrate applied");
@@ -160,69 +163,58 @@ describe("both OnDehydrate and OnHydrate", function(){
     });
   });
 });
-// describe("OnHydrate", function(){
-//   class Parent{
-//     @OnHydrate(()=>"OnHydrate worked on Parent")
-//     name:string;
-//     constructor(name){ this.name = name }
-//   }
-//   class Child extends Parent{
-//     @OnHydrate(()=>"OnHydrate worked on Child")
-//     age:number;
-//     constructor(name, age){ super(name); this.age = age;}
-//   }
-//   it("should works on properties of both parent and child class", function(){
-//     let child = new Child('child', 12);
-//     let hydratedChild = hydrate(child);
-//     expect(hydratedChild.name).toBe("OnHydrate worked on Parent");
-//   });
-// });
-// describe("Hydrator", function(){
-//   beforeAll(()=>{
-//     this.classes = [Seed, Mango, Strawberry];
-//     Hydrator.provideClasses(this.classes);
-//   });
-//   it("should have been provided Object, Array as default", function(){
-//     expect(Hydrator.constructors).toEqual(jasmine.objectContaining({"Object":Object, "Array":Array}));
-//   });
-//   it("should have constructors which have been provided by '.provideClasses()'", function(){
-//     expect(Hydrator.constructors).toEqual(jasmine.objectContaining({
-//       "Seed":Seed, "Mango":Mango, "Strawberry":Strawberry
-//     }));
-//   });
-//   it("should be able to get constructor by '.getConstructor(className:string)'", function(){
-//     for(let i in this.classes){
-//       expect(Hydrator.getConstructor(this.classes[i].constructor.name)).toBe(this.classes[i]);
-//     }
-//   });
-//   it("Hydrator.hydrate === hydrate && Hydrator.dehydrate === dehydrate", function(){
-//     expect(Hydrator.hydrate).toBe(hydrate);
-//     expect(Hydrator.dehydrate).toBe(dehydrate);
-//   });
-// });
-//
-// describe("conservativeness of class type", function(){
-//   let mango, strawberry;
-//   beforeEach(()=>{
-//     let mangoSeed = new Seed();
-//     mango = new Mango(30, mangoSeed);
-//     mangoSeed.setFruit(mango);
-//     let strawberrySeed = new Seed();
-//     strawberry = new Strawberry(10, strawberrySeed);
-//     strawberrySeed.setFruit(mango);
-//   });
-//   it("should preserves class type of root object when dehydrating", function(){
-//     expect(dehydrate(mango)).toEqual(jasmine.objectContaining({_c_:"Mango"}));
-//   });
-//   it("should preserves class type of root object when dehydrate -> stringify -> parse -> hydrate", function(){
-//     let transformingMango = dehydrate(mango);
-//     transformingMango = JSON.stringify(transformingMango);
-//     transformingMango = JSON.parse(transformingMango as string);
-//     transformingMango = hydrate(transformingMango);
-//     expect(transformingMango).toEqual(jasmine.any(Mango));
-//   });
-// });
-//
-// describe("@Exclude decorator", function(){
-//
-// });
+describe("Exclude", function(){
+  @Hydratable()
+  class Parent{
+    @Exclude()
+    name:string;
+    constructor(name){ this.name = name }
+  }
+  @Hydratable()
+  class Child extends Parent{
+    @Exclude()
+    age:number;
+    constructor(name, age){ super(name); this.age = age;}
+  }
+  describe("with original instance", function(){
+    let child = new Child('child', 12);
+    let dehydratedChild = dehydrate(child);
+    it("should work on own property", function(){
+      expect(dehydratedChild.age).toBeNull();
+    });
+    it("should work on inherited property", function(){
+      expect(dehydratedChild.name).toBeNull();
+    });
+  });
+});
+describe("both Exclude and OnHydrate", function(){
+  @Hydratable()
+  class Parent{
+    @Exclude()
+    @OnHydrate(()=>"Parent.OnHydrate applied")
+    name:string;
+    constructor(name){ this.name = name }
+  }
+  @Hydratable()
+  class Child extends Parent{
+    @Exclude()
+    @OnHydrate(()=>"Child.OnHydrate applied")
+    age:number;
+    constructor(name, age){ super(name); this.age = age;}
+  }
+  describe("with original instance", function(){
+    let child = new Child('child', 12);
+    let dehydratedChild = dehydrate(child);
+    let hydratedChild = hydrate(dehydratedChild, Child);
+    let serializedChild = serialize(child);
+    let deserializedChild = deserialize(serializedChild, Child);
+    it("should work on own property", function(){
+      expect(hydratedChild.age).toBe("Child.OnHydrate applied");
+      expect(deserializedChild.age).toBe("Child.OnHydrate applied");
+    });
+    it("should work on inherited property", function(){
+      expect(hydratedChild.name).toBe("Parent.OnHydrate applied");
+      expect(deserializedChild.name).toBe("Parent.OnHydrate applied");
+    });
+  });
+});
