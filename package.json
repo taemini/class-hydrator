@@ -2,7 +2,7 @@
   "name": "class-hydrator",
   "version": "1.0.0",
   "description": "Transformation typescript class instance to stringifiable(serializable) plain object",
-  "main": "src/index.ts",
+  "typgins": "src/index.ts",
   "scripts": {
     "start": "webpack-dev-server --inline --progress",
     "build": "rimraf sampleDist && webpack --config config/webpack.prod.js --progress --profile --bail",
