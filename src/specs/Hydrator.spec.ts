@@ -1,5 +1,5 @@
 import {Hydrator, hydrate, dehydrate, serialize, deserialize, OnHydrate, OnDehydrate, Exclude} from '../index';
-import {Seed, Mango, Strawberry} from './sampleClasses';
+import './sampleClasses';
 
 describe("Hydrator.classes",function(){
   class Arbitary{

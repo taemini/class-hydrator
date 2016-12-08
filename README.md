@@ -3,10 +3,10 @@
 #class-hydrator
 
 When you stringify an instance of a typescript class, it loses its **class type** and it's impossible to use methods of it.
-And you can't even stringify it if the instance had **circular structure.**
+And you can't even stringify it if the instance had **circular structures.**
 
 Introduce class-hydrator. `dehydrate` the instance and stringify it. And send it with ajax, websocket, webrtc
-to remote machine. Then, `hydrate` (restore) it and use it as if it was created in local machine.
+to remote machine. Then, `hydrate` (restore) it and use it as if it was created in remote machine.
 
 This is my first open-source project for my private project. I hope it also helpful for your projects.
 Forks, pull-requests and feedbacks are always welcome.
@@ -36,93 +36,75 @@ Forks, pull-requests and feedbacks are always welcome.
 
 ##Getting started
 
-Let's play some classes (`Human`, `Dog`, `Cat`) like below.
+Let's create some classes like below.
 ```typescript
-class Human {
-  pets:Pet[] = [];
-  
-  constructor(public name:string){ };
-  
-  addPet(pet:Pet){ this.pets.push(pet); }
-  say(){ console.log("Hi!"); }
-}
-
-interface Pet {
-  name:string;
-  master:Human;
-  say:()=>void;
-}
-
-class Dog implements Pet{
-  name:string;
-  master:Human;   //causes circular structure
-  
-  say(){
-    console.log("bowwow!");
-  }
-  
-  constructor(name:string, master:Human, info?:any){
-    this.name = name;
-    this.master = master;
+class Seed {
+  fruit:Fruit;
+  harvest(){
+    return this.fruit;
   }
 }
 
-class Cat implements Cat{
-  name:string;
-  master:Human;   //causes circular structure
-  
-  constructor(name:string, master:Human, private info?:any){
-    this.name = name;
-    this.master = master;
+class Strawberry {
+  constructor(public weight:number, public seed:Seed){
+    seed.fruit = this;    // causes circular structure!
   }
-  
-  say(){
-    console.log("meow!");
-  }
+  greeting(){ console.log("Hi, I'm a strawberry") }
+  getSeed(){ return this.seed }
 }
 ```
 
 And create these instances using classes defined above.
 ```typescript
-let girl = new Human('Mary');
-let dog = new Dog('Toni' ,girl , { habitat:'outdoor', favorites:['chicken', 'santa', 'Mary'] });
-let cat = new Cat('Charls', girl, { habitat:'indoor', favorites:['fish' ,'Toni'] });
+let strawberry = new Strawberry(30, new Seed());
 ```
 
-You cannot serialize girl as it is. `JSON.stringify(girl)` will throw an Error because `girl` instance has circular structures.
-So, dehydrate it before serializing.
+You cannot serialize strawberry as it is. `JSON.stringify(strawberry)` will throw an Error because `strawberry` instance
+has a circular structure. So, dehydrate it before serializing.
 
 ```typescript
-import { Hydrator, dehydrate } from "class-hydrator";
+import { Hydrator, hydrate, dehydrate, serialize } from "class-hydrator";
 
-let dehydratedGirl = Hydrator.dehydrate(girl);  // little verbose
-// or
-let dehydratedGirl = dehydrate(girl);           // dehydrate = Hydrator.dehydrate (without namespace)
+let dehydratedStrawberry = Hydrator.dehydrate(strawberry);  // little verbose
+// or you can also
+let dehydratedStrawberry = dehydrate(strawberry);           // dehydrate is same with Hydrator.dehydrate except there is no namespace.
                                                 // Which style you choose is entirely up to your favor.
-/* dehydratedGirl
+/* dehydratedStrawberry
   Object{
-    _c_: "Human", _i_: 0,
-    name: "Mary",
-    pets: [
-      Object{
-        _c_: "Dog", _i_: 
-      },
-      Object{
-      }
-    ]
+    _c_: "Strawberry", _i_: 0,
+    weight: 30,
+    seed: Object{
+      _c_: "Seed", _i_: 1,
+      fruit: "_i_0"
+    }
   }
  */
-let serializedGirl = JSON.stringify(dehydratedGirl);
+let serializedStrawberry = JSON.stringify(dehydratedStrawberry);
 ```
 
-And now, suppose that serializedGirl have sent to remote browser using websocket.
-Remote browser can `hydrate` (restore) it preserving class types and circular structures.
-Before hydrating it, Every classes used for instanciating `girl` should be provided to Hydrator.
+or you can just
+
 ```typescript
-import { Hydrator, hydrate } from "class-hydrator";
-
-Hydrator.provideClasses([Human, Girl, Dog]);
-dehydratedGirl = JSON.parse(serializedGirl);
-restoredGirl = hydrate(dehydratedGirl);
+let serializedStrawberry = serialize(strawberry);
 ```
-You can now use `restoredGirl.say()` or access to `dehydratedGirl.pets[0].master`.
+
+And now, suppose that serializedStrawberry have sent to remote browser using websocket or xhr or anything you prefer.
+Remote browser can `hydrate` (restore) it preserving class types and circular structures.
+Before hydrating it, Every classes in `Strawberry` should have been provided to Hydrator so as to use the classes for
+instantiating in hydrating process..
+```typescript
+import { Hydrator, hydrate, deserialize } from "class-hydrator";
+
+Hydrator.provideClasses([Strawberry, Seed]);
+dehydratedStrawberry = JSON.parse(serializedStrawberry);
+restoredStrawberry = hydrate(dehydratedStrawberry, Strawberry);
+```
+
+or you can just
+
+```typescript
+restoredStrawberry = deserialize(serializedStrawberry, Strawberry);
+```
+
+You can now use `restoredStrawberry.greeting()` or `restoredStrawberry.seed.harvest()`.
+
