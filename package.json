@@ -1,6 +1,6 @@
 {
   "name": "class-hydrator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Transformation typescript class instance to stringifiable(serializable) plain object",
   "typings": "src/index.ts",
   "scripts": {
