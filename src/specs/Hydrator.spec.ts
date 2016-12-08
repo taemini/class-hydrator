@@ -170,10 +170,10 @@ describe("Exclude", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
     it("should work on own property", function(){
-      expect(dehydratedChild.age).toBeNull();
+      expect(dehydratedChild.age).toBeUndefined();
     });
     it("should work on inherited property", function(){
-      expect(dehydratedChild.name).toBeNull();
+      expect(dehydratedChild.name).toBeUndefined();
     });
   });
 });

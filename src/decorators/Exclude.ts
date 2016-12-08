@@ -1,7 +1,7 @@
-import {OnDehydrateMetadataKey, OnDehydrateMetadata} from './OnDehydrate';
+export const ExcludeMetadataKey = "EXCLUDE";
+
+class ExcludeMetadata { }
 
 export function Exclude(){
-  let newMetadata = new OnDehydrateMetadata(()=>null);
-
-  return Reflect.metadata(OnDehydrateMetadataKey, newMetadata);
+  return Reflect.metadata(ExcludeMetadataKey, new ExcludeMetadata());
 }

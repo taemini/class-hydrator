@@ -1,4 +1,4 @@
-import {OnDehydrateMetadataKey} from '../../decorators';
+import {OnDehydrateMetadataKey, OnHydrateMetadataKey, ExcludeMetadataKey} from '../../decorators';
 
 export function dehydrateProp(targetProp:any, seenObj:any){
   if(targetProp === null || targetProp === undefined ||
@@ -40,12 +40,17 @@ export function dehydrateProp(targetProp:any, seenObj:any){
         newInst['_c_'] = targetProp.constructor.name;
         newInst['_i_'] = seenObj.push(targetProp)-1;
         for(let i in targetProp){
-          let onDehydrateMetadata = Reflect.getMetadata(OnDehydrateMetadataKey, targetProp.constructor.prototype, i);
-          if(onDehydrateMetadata){
-            newInst[i] = onDehydrateMetadata.callback(targetProp);
-          }else{
-            let newProp = dehydrateProp(targetProp[i], seenObj);
-            if(newProp) newInst[i] = newProp;
+          let excludeMetadata = Reflect.getMetadata(ExcludeMetadataKey, targetProp.constructor.prototype, i);
+          let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey, targetProp.constructor.prototype, i);
+          // Only write the property if its not excluded or had an onHydrate decorator
+          if(!excludeMetadata || onHydrateMetadata){
+            let onDehydrateMetadata = Reflect.getMetadata(OnDehydrateMetadataKey, targetProp.constructor.prototype, i);
+            if(onDehydrateMetadata){
+              newInst[i] = onDehydrateMetadata.callback(targetProp);
+            }else{
+              let newProp = dehydrateProp(targetProp[i], seenObj);
+              if(newProp) newInst[i] = newProp;
+            }
           }
         }
         return newInst;
