@@ -1,6 +1,7 @@
-import {HydratableMetadataKey, OnHydrateMetadataKey} from "../../decorators";
+import {OnHydrateMetadataKey} from "../../decorators";
+import {Hydrator} from "../../index";
 
-export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
+export function hydrateProp(targetProp, seenObj, HydratableClass){
   if(targetProp === null || targetProp === undefined || targetProp.constructor === Number || targetProp.constructor === Boolean){
     //primitive types
     return targetProp;
@@ -21,38 +22,26 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
       let newArr = new Array();
       seenObj[targetProp.shift()] = newArr;
       for(let i in targetProp){
-        newArr[i] = hydrateProp(targetProp[i], seenObj, providers, HydratableClass);
+        newArr[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
       }
       return newArr;
     }else if(targetProp.constructor === Object && targetProp._c_){
       //Class
-      let classOfTarget = providers[targetProp._c_];
+      let classOfTarget = Hydrator.classes[targetProp._c_];
       if(!classOfTarget){
-        throw Error(`${targetProp._c_} was not provided to ${(HydratableClass as any).name}`)
+        throw Error(`${targetProp._c_} was not provided to Hydrator`)
       }
       let newInst = new Object();
 
-      let hydratableMetadata = Reflect.getMetadata(HydratableMetadataKey,classOfTarget);
-      if(hydratableMetadata){
-        let targetProviders = hydratableMetadata.providers;
-        for(let i in targetProviders){
-          providers[i] = targetProviders[i];
-        }
-      }else{
-        throw Error(`${targetProp._c_} is not hydratable`)
-      }
       seenObj[targetProp._i_] = newInst;
       for(let i in targetProp){
         if(i==="_i_" || i==="_c_") continue;
-        newInst[i] = hydrateProp(targetProp[i], seenObj, providers, HydratableClass);
+        newInst[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
       }
       (newInst as any).__proto__ = classOfTarget.prototype;
       // apply @OnHydrate()
-      console.log('newInst:',newInst);
       for(let i in newInst){
-        console.log('i:'+i, newInst[i]);
         let onHydrateMetadata = Reflect.getMetadata(OnHydrateMetadataKey,classOfTarget.prototype,i);
-        console.log('onHydrateMetadata:',onHydrateMetadata);
         if(onHydrateMetadata){
           newInst[i] = onHydrateMetadata.callback(newInst);
         }
@@ -64,7 +53,7 @@ export function hydrateProp(targetProp, seenObj, providers, HydratableClass){
       seenObj[targetProp._i_] = newObj;
       for(let i in targetProp){
         if(i==="_i_" || i==="_c_") continue;
-        newObj[i] = hydrateProp(targetProp[i], seenObj, providers, HydratableClass);
+        newObj[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
       }
       return newObj
     }

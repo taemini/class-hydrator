@@ -1,24 +1,39 @@
-import {Hydrator, hydrate, dehydrate, serialize, deserialize, Hydratable, OnHydrate, OnDehydrate, Exclude} from '../index';
+import {Hydrator, hydrate, dehydrate, serialize, deserialize, OnHydrate, OnDehydrate, Exclude} from '../index';
 import {Seed, Mango, Strawberry} from './sampleClasses';
 
+describe("Hydrator.classes",function(){
+  class Arbitary{
+    public thisIsForTest:string;
+  }
+  class OverwrittenClass{
+    public thisIsForTest:number;
+  }
+  it('should provided with abiraty classes by Hydrator.provideClasses',function(){
+    Hydrator.provideClasses([Arbitary]);
+    expect(Hydrator.classes["Arbitary"]).toBe(Arbitary);
+  });
+  it('should be overwritten with arbitary classes by Hydrator.resetClasses', function(){
+    Hydrator.resetClasses([OverwrittenClass]);
+    expect(Hydrator.classes["Arbitary"]).toBeUndefined();
+    expect(Hydrator.classes["OverwrittenClass"]).toBe(OverwrittenClass);
+  })
+});
 describe("Hydratable", function(){
   it('should restore children in HydratableClass (HydratableArgs.providers) work)', function(){
-    @Hydratable()
     class Plant{
       constructor(public weight:number){}
     }
-    @Hydratable()
     class Fruit extends Plant{
       constructor(weight:number, public sweetiness:number){
         super(weight);
       }
     }
-    @Hydratable({providers:[Plant, Fruit]})
     class Apple extends Fruit{
       constructor(weight:number, sweetiness:number, public color:string, public parent:Fruit){
         super(weight, sweetiness);
       }
     }
+    Hydrator.provideClasses([Plant, Fruit, Apple]);
 
     let redFruit = new Fruit(30, 30);
     let apple = new Apple(25, 28, 'red', redFruit);
@@ -29,62 +44,40 @@ describe("Hydratable", function(){
   });
 });
 describe("hydrate exception handlers",function(){
-  it("should throw error when there was a unhydratable class to hydrate", function(){
-    class Plant{
-      constructor(public weight:number){}
-    }
-    // @Hydratable()  Fruit is unhydratable now.
-    class Fruit extends Plant{
-      constructor(weight:number, public sweetiness:number){
-        super(weight);
-      }
-    }
-    @Hydratable({providers:[Fruit]})
-    class Apple extends Fruit{
-      constructor(weight:number, sweetiness:number, public color:string, public parent:Fruit){
-        super(weight, sweetiness);
-      }
-    }
-    let redFruit = new Fruit(30, 30);
-    let apple = new Apple(25, 28, 'red', redFruit);
-    let dehydratedApple = dehydrate(apple);
-    expect(()=>{hydrate(dehydratedApple, Apple)}).toThrowError("Fruit is not hydratable")
-  });
   it("should throw error when there was not provided class to hydrate", function(){
     class Plant{
       constructor(public weight:number){}
     }
-    @Hydratable()
     class Fruit extends Plant{
       constructor(weight:number, public sweetiness:number){
         super(weight);
       }
     }
-    @Hydratable()  // Fruit is not hydratable (required for hydrating Apple.parent:Fruit)
     class Apple extends Fruit{
       constructor(weight:number, sweetiness:number, public color:string, public parent:Fruit){
         super(weight, sweetiness);
       }
     }
+    Hydrator.resetClasses([Apple]);
+
     let redFruit = new Fruit(30, 30);
     let apple = new Apple(25, 28, 'red', redFruit);
     let dehydratedApple = dehydrate(apple);
-    expect(()=>{hydrate(dehydratedApple, Apple)}).toThrowError("Fruit was not provided to Apple")
+    expect(()=>{hydrate(dehydratedApple, Apple)}).toThrowError("Fruit was not provided to Hydrator")
   })
 });
 describe("OnHydrate", function(){
-  @Hydratable()
   class Parent{
     @OnHydrate(()=>"Parent.OnHydrate applied")
     name:string;
     constructor(name){ this.name = name }
   }
-  @Hydratable()
   class Child extends Parent{
     @OnHydrate(()=>"Child.OnHydrate applied")
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  Hydrator.resetClasses([Parent, Child]);
   describe("with original instance", function(){
     let child = new Child('child', 12);
     let hydratedChild = hydrate(child, Child);
@@ -108,18 +101,17 @@ describe("OnHydrate", function(){
   });
 });
 describe("OnDehydrate", function(){
-  @Hydratable()
   class Parent{
     @OnDehydrate(()=>"Parent.OnDehydrate applied")
     name:string;
     constructor(name){ this.name = name }
   }
-  @Hydratable()
   class Child extends Parent{
     @OnDehydrate(()=>"Child.OnDehydrate applied")
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  Hydrator.resetClasses([Parent, Child]);
   describe("with original instance", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
@@ -132,20 +124,19 @@ describe("OnDehydrate", function(){
   });
 });
 describe("both OnDehydrate and OnHydrate", function(){
-  @Hydratable()
   class Parent{
     @OnDehydrate(()=>"Parent.OnDehydrate applied")
     @OnHydrate(()=>"Parent.OnHydrate applied")
     name:string;
     constructor(name){ this.name = name }
   }
-  @Hydratable()
   class Child extends Parent{
     @OnDehydrate(()=>"Child.OnDehydrate applied")
     @OnHydrate(()=>"Child.OnHydrate applied")
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  Hydrator.resetClasses([Parent, Child]);
   describe("with original instance", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
@@ -164,18 +155,17 @@ describe("both OnDehydrate and OnHydrate", function(){
   });
 });
 describe("Exclude", function(){
-  @Hydratable()
   class Parent{
     @Exclude()
     name:string;
     constructor(name){ this.name = name }
   }
-  @Hydratable()
   class Child extends Parent{
     @Exclude()
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  Hydrator.resetClasses([Parent, Child]);
   describe("with original instance", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
@@ -188,20 +178,19 @@ describe("Exclude", function(){
   });
 });
 describe("both Exclude and OnHydrate", function(){
-  @Hydratable()
   class Parent{
     @Exclude()
     @OnHydrate(()=>"Parent.OnHydrate applied")
     name:string;
     constructor(name){ this.name = name }
   }
-  @Hydratable()
   class Child extends Parent{
     @Exclude()
     @OnHydrate(()=>"Child.OnHydrate applied")
     age:number;
     constructor(name, age){ super(name); this.age = age;}
   }
+  Hydrator.resetClasses([Parent, Child]);
   describe("with original instance", function(){
     let child = new Child('child', 12);
     let dehydratedChild = dehydrate(child);
