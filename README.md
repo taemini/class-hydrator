@@ -1,5 +1,3 @@
-###Caution: This is in progress. Do not install this package.
-
 #class-hydrator
 
 When you stringify an instance of a typescript class, it loses its **class type** and it's impossible to use methods of it.
@@ -54,7 +52,7 @@ class Strawberry {
 }
 ```
 
-And create these instances using classes defined above.
+And create strawberry instance using classes defined above.
 ```typescript
 let strawberry = new Strawberry(30, new Seed());
 ```
@@ -108,3 +106,40 @@ restoredStrawberry = deserialize(serializedStrawberry, Strawberry);
 
 You can now use `restoredStrawberry.greeting()` or `restoredStrawberry.seed.harvest()`.
 
+##Decorators
+You can refine how the properties in you Class will be Hydrated or Dehydrated with property decorators.
+I prepared two decorators, `@OnDehydrate()` and `@OnHydrate()`.
+And also additional `@Exclude()` for convenience.
+
+```typescript
+import {Hydrator, OnHydrate, OnDehydrate, hydrate, dehydrate} from 'class-hydrator';
+
+class Point{
+  constructor(public x:number, public y:number){ }
+}
+
+class Rectangle{
+  @OnDehydrate((self)=>{    // or you can use just @Exclude() (@Exclude() equals to @OnDehydrate((self)=>null)
+    return null;
+  })
+  @OnHydrate((self)=>{
+    let divElement = new HTMLDivElement();
+    // style the divElement using self.color, self.offset
+    return divElement;
+  })
+  elem:HTMLDivElement;
+  
+  constructor(private color:string, private offset:Point){ }
+}
+
+Hydrator.provideClasses([Point, Rectangle]);
+```
+`@OnDehydrate()` decorator accepts a function which returns new value you want to set when Rectangle is dehydrated.
+It is good practice to compress some properties if they can be generated using other properties. Rectangle.elem will
+be null when you dehydrate a Rectangle-type object. And restored when being hydrated.
+
+You can hydrate `Rectangle` instance as well as **dehydrated** Rectangle so as to trigger the `@OnHydrate()` decorators.
+```typescript
+let rectangle = new Rectangle('red', new Point(300,200)); // rectangle.elem is not ready yet.
+rectangle = hydrate(rectangle);                           // rectangle.elem is now ready.
+```
