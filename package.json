@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/pplink/class-hydrator#readme",
   "devDependencies": {
+    "@types/core-js": "^0.9.34",
+    "@types/jasmine": "^2.5.38",
     "awesome-typescript-loader": "^3.0.0-beta.3",
     "enhanced-resolve": "^2.3.0",
     "extract-text-webpack-plugin": "^1.0.1",
@@ -47,6 +49,6 @@
     "webpack-merge": "^0.17.0"
   },
   "dependencies": {
-    "reflect-metadata": "^0.1.8"
+    "core-js": "^2.4.1"
   }
 }

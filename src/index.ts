@@ -1,4 +1,5 @@
-import 'reflect-metadata';
+import 'core-js/es6';
+import 'core-js/es7/reflect';
 import {dehydrate, serialize} from './methods/dehydrate';
 import {hydrate, deserialize} from './methods/hydrate';
 export * from './methods/dehydrate';
