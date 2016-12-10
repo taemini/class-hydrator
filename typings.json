@@ -1,5 +1,6 @@
 {
   "globalDependencies": {
-    "jasmine": "registry:dt/jasmine#2.5.0+20161025102649"
+    "jasmine": "registry:dt/jasmine#2.5.0+20161025102649",
+    "reflect-metadata": "registry:dt/reflect-metadata#0.0.0+20160630155503"
   }
 }
