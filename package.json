@@ -1,6 +1,6 @@
 {
   "name": "class-hydrator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Transformation typescript class instance to stringifiable(serializable) plain object",
   "scripts": {
     "start": "webpack-dev-server --inline --progress",
