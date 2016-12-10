@@ -47,7 +47,6 @@
     "webpack-merge": "^0.17.0"
   },
   "dependencies": {
-    "@types/core-js": "^0.9.34",
     "core-js": "^2.4.1"
   }
 }
