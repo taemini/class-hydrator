@@ -1,4 +1,4 @@
-/// <reference path="../typings/index.d.ts" />
+/// <reference path="../typings/globals/reflect-metadata/index.d.ts" />
 
 import 'core-js/es6';
 import 'core-js/es7/reflect';
