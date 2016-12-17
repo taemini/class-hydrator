@@ -2,7 +2,7 @@ import {hydrateProp} from './hydrateProp';
 import {hydratePropWithoutInstantiating} from './hydratePropWithoutInstantiating';
 
 // export function hydrate<T>(targetObj:T):T;
-export function hydrate<T>(targetObj:any, HydratableClass:{new(...args):T;}):T{
+export function hydrate<T>(targetObj:any, HydratableClass?:{new(...args):T;}):T{
   let seenObj = [];
 
   if(targetObj._c_){
