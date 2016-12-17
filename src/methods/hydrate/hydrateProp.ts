@@ -1,7 +1,7 @@
 import {OnHydrateMetadataKey} from "../../decorators";
 import {Hydrator} from "../../index";
 
-export function hydrateProp(targetProp, seenObj, HydratableClass){
+export function hydrateProp(targetProp, seenObj){
   if(targetProp === null || targetProp === undefined || targetProp.constructor === Number || targetProp.constructor === Boolean){
     //primitive types
     return targetProp;
@@ -22,7 +22,7 @@ export function hydrateProp(targetProp, seenObj, HydratableClass){
       let newArr = new Array();
       seenObj[targetProp.shift()] = newArr;
       for(let i in targetProp){
-        newArr[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
+        newArr[i] = hydrateProp(targetProp[i], seenObj);
       }
       return newArr;
     }else if(targetProp.constructor === Object && targetProp._c_){
@@ -36,7 +36,7 @@ export function hydrateProp(targetProp, seenObj, HydratableClass){
       seenObj[targetProp._i_] = newInst;
       for(let i in targetProp){
         if(i==="_i_" || i==="_c_") continue;
-        newInst[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
+        newInst[i] = hydrateProp(targetProp[i], seenObj);
       }
       (newInst as any).__proto__ = classOfTarget.prototype;
       // apply @OnHydrate()
@@ -53,7 +53,7 @@ export function hydrateProp(targetProp, seenObj, HydratableClass){
       seenObj[targetProp._i_] = newObj;
       for(let i in targetProp){
         if(i==="_i_" || i==="_c_") continue;
-        newObj[i] = hydrateProp(targetProp[i], seenObj, HydratableClass);
+        newObj[i] = hydrateProp(targetProp[i], seenObj);
       }
       return newObj
     }

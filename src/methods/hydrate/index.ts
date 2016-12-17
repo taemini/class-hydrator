@@ -6,13 +6,7 @@ export function hydrate<T>(targetObj:any, HydratableClass?:{new(...args):T;}):T{
   let seenObj = [];
 
   if(targetObj._c_){
-    //if HydratableClass is required.
-    if(!HydratableClass){
-      //HydratableClass is required but not passed
-      throw Error("Cannot hydrate a dehydrated instance without HydratableClass");
-    } else {
-      return hydrateProp(targetObj, seenObj, HydratableClass);
-    }
+    return hydrateProp(targetObj, seenObj);
   }else{
     //trying to hydrate not-instantiated-obj (only triggers @OnHydrate handlers)
     hydratePropWithoutInstantiating(targetObj, seenObj);
