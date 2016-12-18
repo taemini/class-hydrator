@@ -207,3 +207,30 @@ describe("both Exclude and OnHydrate", function(){
     });
   });
 });
+describe("getter setter", function(){
+  class Human{
+    public fullName:string;
+    constructor(public age:number, public lastName:string){
+      this.fullName = lastName;
+    }
+    set firstName(firstName:string){
+      this.fullName = firstName+' '+this.lastName;
+    }
+    get firstName(){
+      let nameArr = this.fullName.split(' ');
+      return nameArr[0];
+    }
+  }
+  Hydrator.resetClasses([Human]);
+  let human = new Human(12, 'Kim');
+  let dehydratedHuman = dehydrate(human);
+  let hydratedHuman = hydrate(dehydratedHuman, Human);
+  console.log('human:',human);
+  console.log('dehydratedHuman:',dehydratedHuman);
+  console.log('hydratedHuman:',hydratedHuman);
+  hydratedHuman.firstName = 'Taemin';
+  it("should available after dehydrated and hydrated", function(){
+    expect(hydratedHuman.fullName).toBe('Taemin Kim');
+    expect(hydratedHuman.firstName).toBe('Taemin');
+  });
+});
