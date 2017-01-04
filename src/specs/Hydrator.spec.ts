@@ -177,6 +177,18 @@ describe("Exclude", function(){
     });
   });
 });
+describe("Dehydrate", function(){
+  class Point {
+    constructor(public x:number, public y:number){}
+  }
+  Hydrator.resetClasses([Point]);
+  let leftTop = new Point(0,0);
+  let dehydratedLeftTop = dehydrate(leftTop);
+  it("should not ignore number member '0'", function(){
+    expect(dehydratedLeftTop.x).not.toBeUndefined();
+    expect(dehydratedLeftTop.y).not.toBeUndefined();
+  });
+});
 describe("both Exclude and OnHydrate", function(){
   class Parent{
     @Exclude()

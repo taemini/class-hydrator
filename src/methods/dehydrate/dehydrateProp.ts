@@ -7,7 +7,7 @@ export function dehydrateProp(targetProp:any, seenObj:any){
     return targetProp;
   }else if(targetProp.constructor === Function){
     //ignores Function type
-    return null;
+    return "IGNORE_IT";
   }else{
     let targetIdxInSeenObj = seenObj.indexOf(targetProp);
     if(targetIdxInSeenObj !== -1){
@@ -49,7 +49,7 @@ export function dehydrateProp(targetProp:any, seenObj:any){
             newInst[i] = onDehydrateMetadata.callback(targetProp);
           }else{
             let newProp = dehydrateProp(targetProp[i], seenObj);
-            if(newProp) newInst[i] = newProp;
+            if(newProp!=="IGNORE_IT") newInst[i] = newProp;
           }
         }
         return newInst;
