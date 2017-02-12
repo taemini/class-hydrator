@@ -36,7 +36,8 @@ export function hydrateProp(targetProp, seenObj){
       seenObj[targetProp._i_] = newInst;
       for(let i in targetProp){
         if(i==="_i_" || i==="_c_") continue;
-        newInst[i] = hydrateProp(targetProp[i], seenObj);
+        else if(i==="_N_") newInst[i] = null;
+        else newInst[i] = hydrateProp(targetProp[i], seenObj);
       }
       (newInst as any).__proto__ = classOfTarget.prototype;
       // apply @OnHydrate()
