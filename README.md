@@ -1,4 +1,4 @@
-#class-hydrator
+# class-hydrator
 
 When you stringify an instance of a typescript class, it loses its **class type** and it's impossible to use methods of it.
 And you can't even stringify it if the instance had **circular structures.**
@@ -9,7 +9,7 @@ to remote machine. Then, `hydrate` (restore) it and use it as if it was created 
 This is my first open-source project for my private project. I hope it also helpful for your projects.
 Forks, pull-requests and feedbacks are always welcome.
 
-##Installation
+## Installation
 
 1. It supports only a typescript project. And it requires `emitDecoratorMetadata`, `experimentalDecorators` options in `tsconfig.json`
     ```json
@@ -32,7 +32,7 @@ Forks, pull-requests and feedbacks are always welcome.
     $npm install --save class-hydrator
     ```
 
-##Getting started
+## Getting started
 
 Let's create some classes like below.
 ```typescript
