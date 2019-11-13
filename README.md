@@ -1,9 +1,9 @@
 # class-hydrator
 
-When you stringify an instance of a typescript class, it loses its **class type** and it's impossible to use methods of it.
+When you stringify an instance of a typescript class, it loses its **class type** and it's impossible to use methods of the class.
 And you can't even stringify it if the instance had **circular structures.**
 
-Introduce class-hydrator. `dehydrate` the instance and stringify it. And send it with ajax, websocket, webrtc
+Let me introduce class-hydrator. `dehydrate` the instance and stringify it. And send it with ajax, websocket, webrtc
 to remote machine. Then, `hydrate` (restore) it and use it as if it was created in remote machine.
 
 This is my first open-source project for my private project. I hope it also helpful for your projects.
